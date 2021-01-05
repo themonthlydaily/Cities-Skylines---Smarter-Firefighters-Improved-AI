@@ -105,7 +105,7 @@ namespace SmarterFirefighters
         {
             if ((vehicleData.m_flags & (Vehicle.Flags.GoingBack | Vehicle.Flags.WaitingTarget)) != 0)
             {
-                ushort newTarget = NewFireAI.FindBurningBuilding(vehicleData.GetLastFramePosition(), 50f);
+                ushort newTarget = NewFireAI.FindBurningBuilding(vehicleData.GetLastFramePosition(), 40f);
                 if (newTarget != 0)
                 {
                     vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, newTarget);
