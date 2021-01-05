@@ -8,6 +8,8 @@ namespace SmarterFirefighters
 {
     public class NewFireAI
     {
+        // This method returns the ID of the nearest burning building within the specified maximum distance.
+        // If no burning building exists within the specified maximum distance, it returns 0
         public static ushort FindBurningBuilding(Vector3 pos, float maxDistance)
         {
             // Initialize BuildingManager using <singleton> as in FindBurningTree
@@ -55,6 +57,42 @@ namespace SmarterFirefighters
             }
             return result;
         }
+
+        // This method retargets the individual firefighter citizens spawned by fire trucks to the target of the parent vehicle
+        public static void  TargetCimsParentVehicleTarget(ushort vehicleID, ref Vehicle vehicleData)
+        {
+            CitizenManager instance = Singleton<CitizenManager>.instance;
+            uint num = vehicleData.m_citizenUnits;
+            int num2 = 0;
+            while (num != 0)
+            {
+                uint nextUnit = instance.m_units.m_buffer[num].m_nextUnit;
+                for (int i = 0; i < 5; i++)
+                {
+                    uint citizen = instance.m_units.m_buffer[num].GetCitizen(i);
+                    if (citizen == 0)
+                    {
+                        continue;
+                    }
+                    ushort instance2 = instance.m_citizens.m_buffer[citizen].m_instance;
+                    if (instance2 == 0)
+                    {
+                        continue;
+                    }
+                    CitizenInfo info = instance.m_instances.m_buffer[instance2].Info;
+                    info.m_citizenAI.SetTarget(instance2, ref instance.m_instances.m_buffer[instance2], vehicleData.m_targetBuilding);
+
+                    //// Print debug data to log
+                    //UnityEngine.Debug.Log("Cim " + instance2 + " from Firetruck ID: " + vehicleID + " retargeted to " + vehicleData.m_targetBuilding);
+                }
+                num = nextUnit;
+                if (++num2 > 524288)
+                {
+                    CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
+                    break;
+                }
+            }
+        }
     }
 
     // Instruct firetrucks to respond to fires that they drive by when returning to the station or nearby fires when waiting for a new target
@@ -76,6 +114,13 @@ namespace SmarterFirefighters
                     //BuildingManager instance = Singleton<BuildingManager>.instance;
                     //float tempDistance = VectorUtils.LengthXZ(vehicleData.GetLastFramePosition() - instance.m_buildings.m_buffer[newTarget].m_position);
                     //UnityEngine.Debug.Log("Firetruck ID: " + vehicleID + " target set " + newTarget + " distance " + tempDistance);
+
+                    // If the fire truck is stopped, the new target building is close enough that it will not move again so retarget deployed firefighting cims
+                    if ((vehicleData.m_flags & Vehicle.Flags.Stopped) != 0)
+                    {
+                        NewFireAI.TargetCimsParentVehicleTarget(vehicleID, ref vehicleData);
+                    }
+
                 }
             }
         }
