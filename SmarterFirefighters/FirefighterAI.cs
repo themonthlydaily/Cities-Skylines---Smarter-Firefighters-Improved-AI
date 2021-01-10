@@ -137,8 +137,21 @@ namespace SmarterFirefighters
                 ushort newTarget = NewFireAI.FindBurningBuilding(vehicleData.GetLastFramePosition(), 500f);
                 if (newTarget != 0)
                 {
+                    //// Debug info to solve despawn issue
+                    //UnityEngine.Debug.Log(vehicleData.m_flags);
+                    //UnityEngine.Debug.Log("Transfer type is: " + vehicleData.m_transferType);
+
+                    // Switch to building extinguishing material if carrying tree extinguishing material
+                    // If this is not done, copter will despawn if targeted at a burning building
+                    if(vehicleData.m_transferType == 68)
+                    {
+                        vehicleData.m_transferType = 71;
+                    }
+
                     vehicleData.Info.m_vehicleAI.SetTarget(vehicleID, ref vehicleData, newTarget);
 
+                    //// Debug info to solve despawn issue
+                    //UnityEngine.Debug.Log(vehicleData.m_flags);
                     //// Print debug data to log
                     //BuildingManager instance = Singleton<BuildingManager>.instance;
                     //float tempDistance = VectorUtils.LengthXZ(vehicleData.GetLastFramePosition() - instance.m_buildings.m_buffer[newTarget].m_position);
