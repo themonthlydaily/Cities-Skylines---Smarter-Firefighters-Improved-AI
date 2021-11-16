@@ -62,6 +62,7 @@ namespace SmarterFirefighters
         public static void  TargetCimsParentVehicleTarget(ushort vehicleID, ref Vehicle vehicleData)
         {
             CitizenManager instance = Singleton<CitizenManager>.instance;
+            uint numCitizenUnits = instance.m_units.m_size;
             uint num = vehicleData.m_citizenUnits;
             int num2 = 0;
             while (num != 0)
@@ -86,7 +87,7 @@ namespace SmarterFirefighters
                     //UnityEngine.Debug.Log("Cim " + instance2 + " from Firetruck ID: " + vehicleID + " retargeted to " + vehicleData.m_targetBuilding);
                 }
                 num = nextUnit;
-                if (++num2 > 524288)
+                if (++num2 > numCitizenUnits)
                 {
                     CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                     break;
